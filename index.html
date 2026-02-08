@@ -107,6 +107,143 @@
 .card:hover img {
     transform: scale(1.05);
 }
+
+        /* Checkout Modal Styling */
+        #checkoutModal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15, 23, 42, 0.95);
+            z-index: 3000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+        }
+
+        #checkoutModal.active {
+            display: flex;
+        }
+
+        .checkout-container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+        }
+
+        .checkout-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 20px;
+        }
+
+        .checkout-header h2 {
+            margin: 0;
+            font-size: 1.8rem;
+        }
+
+        .close-checkout {
+            background: none;
+            border: none;
+            font-size: 1.8rem;
+            cursor: pointer;
+            color: var(--text-light);
+            padding: 0;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .close-checkout:hover {
+            color: var(--text-dark);
+        }
+
+        .form-section {
+            margin-bottom: 30px;
+        }
+
+        .form-section h3 {
+            font-size: 1.1rem;
+            margin: 0 0 15px 0;
+            color: var(--primary);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .form-row.full {
+            grid-template-columns: 1fr;
+        }
+
+        .checkout-btn {
+            background: var(--success);
+            color: white;
+            border: none;
+            padding: 16px 32px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 700;
+            width: 100%;
+            font-size: 1rem;
+            margin-top: 20px;
+        }
+
+        .checkout-btn:hover {
+            filter: brightness(1.1);
+        }
+
+        .order-summary {
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 30px;
+            border: 1px solid #eef2f6;
+        }
+
+        .order-summary h4 {
+            margin: 0 0 15px 0;
+            font-size: 1rem;
+        }
+
+        .order-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #e2e8f0;
+            font-size: 0.9rem;
+        }
+
+        .order-item:last-child {
+            border-bottom: none;
+        }
+
+        .order-total {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            margin-top: 12px;
+            border-top: 2px solid #cbd5e1;
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
     </style>
 </head>
 <body>
@@ -119,6 +256,8 @@
         <button onclick="switchTab(event, 'quote')">Quote</button>
         <button onclick="switchTab(event, 'materials')">Materials</button>
         <button onclick="switchTab(event, 'about')">About</button>
+        <button onclick="openAuthModal()" id="authBtn" style="background: none; border: none; color: #94a3b8; margin-left:10px; cursor:pointer; font-weight:600; padding:10px 16px; border-radius:12px;">Login</button>
+        <button id="adminBtn" onclick="openAdminDashboard()" style="display:none; background: rgba(139,92,246,0.12); color:#8b5cf6; border:none; margin-left:10px; padding:8px 12px; border-radius:10px; font-weight:700;">Admin</button>
         <button onclick="switchTab(event, 'cart')" id="cartBtn" style="background: rgba(255,255,255,0.1);">🛒 Cart (0)</button>
     </nav>
 </header>
@@ -132,70 +271,14 @@
     </div>
 
     <div style="display: flex; justify-content: center; gap: 10px; margin-bottom: 30px; flex-wrap: wrap;">
-        <button class="status-tag" style="cursor:pointer; border:1px solid var(--accent); background:var(--accent); color:white;" onclick="filterShop('all')">All Objects</button>
-        <button class="status-tag" style="cursor:pointer; border:1px solid #cbd5e1; background:white; color:var(--text-light);" onclick="filterShop('fidget')">Fidgets</button>
-        <button class="status-tag" style="cursor:pointer; border:1px solid #cbd5e1; background:white; color:var(--text-light);" onclick="filterShop('flexi')">Flexis</button>
-        <button class="status-tag" style="cursor:pointer; border:1px solid #cbd5e1; background:white; color:var(--text-light);" onclick="filterShop('practical')">Practical</button>
+        <button class="status-tag" style="cursor:pointer; border:1px solid var(--accent); background:var(--accent); color:white;" onclick="filterShop('all', this)">All Objects</button>
+        <button class="status-tag" style="cursor:pointer; border:1px solid #cbd5e1; background:white; color:var(--text-light);" onclick="filterShop('fidget', this)">Fidgets</button>
+        <button class="status-tag" style="cursor:pointer; border:1px solid #cbd5e1; background:white; color:var(--text-light);" onclick="filterShop('flexi', this)">Flexis</button>
+        <button class="status-tag" style="cursor:pointer; border:1px solid #cbd5e1; background:white; color:var(--text-light);" onclick="filterShop('practical', this)">Practical</button>
     </div>
 
-    <div class="grid" id="productGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 25px;">
-        
-        <div class="card product-item flexi" onclick="openModal('Crystal Dragon')" style="cursor: pointer; aspect-ratio: 1 / 1; display: flex; flex-direction: column;">
-            <img src="https://images.unsplash.com/photo-1631125915902-d8abe9225ff2?w=500" style="height: 150px; width: 100%; object-fit: cover; border-radius: 12px;">
-            <span class="status-tag" style="background: #e0f2fe; color: #0369a1; width: fit-content; margin-top: 10px;">Silk PLA</span>
-            <h3 style="margin: 10px 0 5px 0; font-size: 1.1rem;">Crystal Flexi-Dragon</h3>
-            <div class="price-badge" style="margin: auto 0 10px 0; font-size: 1.3rem;">$20.00</div>
-            <button class="btn" onclick="event.stopPropagation(); addToCart('Crystal Dragon', 20.00)">Add to Cart</button>
-        </div>
-
-        <div class="card product-item practical" onclick="openModal('Minimalist Planter')" style="cursor: pointer; aspect-ratio: 1 / 1; display: flex; flex-direction: column;">
-            <img src="https://images.unsplash.com/photo-1485841890310-6a055c88698a?w=500" style="height: 150px; width: 100%; object-fit: cover; border-radius: 12px;">
-            <span class="status-tag" style="background: #ecfdf5; color: #059669; width: fit-content; margin-top: 10px;">PLA</span>
-            <h3 style="margin: 10px 0 5px 0; font-size: 1.1rem;">Minimalist Planter</h3>
-            <div class="price-badge" style="margin: auto 0 10px 0; font-size: 1.3rem;">$14.00</div>
-            <button class="btn" onclick="event.stopPropagation(); addToCart('Minimalist Planter', 14.00)">Add to Cart</button>
-        </div>
-
-        <div class="card product-item fidget" onclick="openModal('Infinity Cube')" style="cursor: pointer; aspect-ratio: 1 / 1; display: flex; flex-direction: column;">
-            <img src="https://images.unsplash.com/photo-1558655146-d09347e92766?w=500" style="height: 150px; width: 100%; object-fit: cover; border-radius: 12px;">
-            <span class="status-tag" style="background: #e0f2fe; color: #0369a1; width: fit-content; margin-top: 10px;">PLA</span>
-            <h3 style="margin: 10px 0 5px 0; font-size: 1.1rem;">Infinity Cube</h3>
-            <div class="price-badge" style="margin: auto 0 10px 0; font-size: 1.3rem;">$10.00</div>
-            <button class="btn" onclick="event.stopPropagation(); addToCart('Infinity Cube', 10.00)">Add to Cart</button>
-        </div>
-
-        <div class="card product-item practical" onclick="openModal('Phone Stand')" style="cursor: pointer; aspect-ratio: 1 / 1; display: flex; flex-direction: column;">
-            <img src="https://images.unsplash.com/photo-1586105251261-72a756657a13?w=500" style="height: 150px; width: 100%; object-fit: cover; border-radius: 12px;">
-            <span class="status-tag" style="background: #f3e8ff; color: #6b21a8; width: fit-content; margin-top: 10px;">TPU</span>
-            <h3 style="margin: 10px 0 5px 0; font-size: 1.1rem;">Folding Phone Stand</h3>
-            <div class="price-badge" style="margin: auto 0 10px 0; font-size: 1.3rem;">$9.00</div>
-            <button class="btn" onclick="event.stopPropagation(); addToCart('Phone Stand', 9.00)">Add to Cart</button>
-        </div>
-
-        <div class="card product-item flexi" onclick="openModal('Flexi-Axolotl')" style="cursor: pointer; aspect-ratio: 1 / 1; display: flex; flex-direction: column;">
-            <img src="https://images.unsplash.com/photo-1590424753858-394a92c6eff2?w=500" style="height: 150px; width: 100%; object-fit: cover; border-radius: 12px;">
-            <span class="status-tag" style="background: #e0f2fe; color: #0369a1; width: fit-content; margin-top: 10px;">Silk PLA</span>
-            <h3 style="margin: 10px 0 5px 0; font-size: 1.1rem;">Articulated Axolotl</h3>
-            <div class="price-badge" style="margin: auto 0 10px 0; font-size: 1.3rem;">$18.00</div>
-            <button class="btn" onclick="event.stopPropagation(); addToCart('Flexi-Axolotl', 18.00)">Add to Cart</button>
-        </div>
-
-        <div class="card product-item practical" onclick="openModal('Tool Tray')" style="cursor: pointer; aspect-ratio: 1 / 1; display: flex; flex-direction: column;">
-            <img src="https://images.unsplash.com/photo-1581244276891-83393abc67aa?w=500" style="height: 150px; width: 100%; object-fit: cover; border-radius: 12px;">
-            <span class="status-tag" style="background: #fef2f2; color: #b91c1c; width: fit-content; margin-top: 10px;">Tough PLA</span>
-            <h3 style="margin: 10px 0 5px 0; font-size: 1.1rem;">Magnetic Hex Tray</h3>
-            <div class="price-badge" style="margin: auto 0 10px 0; font-size: 1.3rem;">$12.00</div>
-            <button class="btn" onclick="event.stopPropagation(); addToCart('Tool Tray', 12.00)">Add to Cart</button>
-        </div>
-
-        <div class="card product-item fidget" onclick="openModal('Squishy Octopus')" style="cursor: pointer; aspect-ratio: 1 / 1; display: flex; flex-direction: column;">
-            <img src="https://images.unsplash.com/photo-1591123120675-6f7f1aae0e5b?w=500" style="height: 150px; width: 100%; object-fit: cover; border-radius: 12px;">
-            <span class="status-tag" style="background: #f3e8ff; color: #6b21a8; width: fit-content; margin-top: 10px;">TPU</span>
-            <h3 style="margin: 10px 0 5px 0; font-size: 1.1rem;">Squishy Octopus</h3>
-            <div class="price-badge" style="margin: auto 0 10px 0; font-size: 1.3rem;">$12.00</div>
-            <button class="btn" onclick="event.stopPropagation(); addToCart('Squishy Octopus', 12.00)">Add to Cart</button>
-        </div>
-
+    <div class="grid" id="productGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 30px;">
+        <!-- Products are rendered dynamically by renderProducts() -->
     </div>
 </section>
 
@@ -366,26 +449,34 @@
     </section>
 
     <section id="about" class="tab-content">
-        <h2 style="font-size: 2rem; margin-bottom: 30px;">Our Story</h2>
-        <div class="grid">
-            <div class="card">
-                <h3>The Nexus3D Duo</h3>
-                <p style="font-size: 1.1rem; line-height: 1.7;">We are two teens starting a business to bring affordable, high-quality 3D printing to everyone! What started as a hobby in our garage is now a local hub for makers.</p>
-                <p style="margin-top: 25px;"><strong>Contact:</strong></p>
-                <a href="mailto:nexus3dbuisness@gmail.com" class="btn" style="text-decoration: none; display: inline-block; width: auto;">nexus3dbuisness@gmail.com</a>
-            </div>
-            <div class="card" style="border-left: 6px solid var(--accent); background: #f0f9ff;">
-                <h3>Operation Hours</h3>
-                <div style="margin: 20px 0;">
-                    <p><strong>Weekdays:</strong> 4:30pm — 9:30pm</p>
-                    <p><strong>Weekends:</strong> 9:00am — 12:00pm</p>
-                </div>
-                <p style="font-size: 0.9rem; color: var(--text-light); font-style: italic; background: white; padding: 15px; border-radius: 10px;">
-                    *Since we are students, we handle orders and support after our school day ends. Thanks for your patience!
-                </p>
-            </div>
+    <h2 style="font-size: 2rem; margin-bottom: 30px;">Our Story</h2>
+    <div class="grid">
+        <div class="card">
+            <h3>The Nexus3D Duo</h3>
+            <p style="font-size: 1.1rem; line-height: 1.7;">We are two teens starting a business to bring affordable, high-quality 3D printing to everyone! What started as a hobby in our garage is now a local hub for makers.</p>
+            <p style="margin-top: 25px;"><strong>Contact:</strong></p>
+            <a href="mailto:nexus3dbuisness@gmail.com" class="btn" style="text-decoration: none; display: inline-block; width: auto;">nexus3dbuisness@gmail.com</a>
         </div>
-    </section>
+        
+        <div class="card" style="border-left: 6px solid var(--accent); background: #f0f9ff;">
+            <h3>Operation Hours</h3>
+            <div style="margin: 20px 0;">
+                <p><strong>Weekdays:</strong> 4:30pm — 9:30pm</p>
+                <p><strong>Weekends:</strong> 9:00am — 12:00pm</p>
+            </div>
+
+            <div style="margin-top: 20px; padding: 15px; background: var(--white); border-radius: 10px; border: 1px dashed var(--accent);">
+                <strong style="color: var(--accent); display: block; margin-bottom: 5px;">📅 Special Schedule</strong>
+                <p style="margin: 0; font-weight: 700;">February 9 — 13</p>
+                <p style="margin: 5px 0 0 0;">9:00am — 12:00pm</p>
+            </div>
+
+            <p style="font-size: 0.9rem; color: var(--text-light); font-style: italic; margin-top: 20px;">
+                *Since we are students, we handle orders and support after our school day ends (except during special break weeks!).
+            </p>
+        </div>
+    </div>
+</section>
 
     <section id="cart" class="tab-content">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
@@ -401,9 +492,9 @@
             <div id="cartSummary" style="display:none; margin-top: 30px; border-top: 2px solid #f1f5f9; padding-top: 30px;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
                     <h2 style="margin:0;">Total Amount: <span id="cartTotal" style="color: var(--accent);">$0.00</span></h2>
-                    <button class="btn" style="width: auto; padding: 16px 50px;" onclick="checkout()">Checkout via Email</button>
+                    <button class="btn" style="width: auto; padding: 16px 50px;" onclick="openCheckout()">Checkout</button>
                 </div>
-                <p style="font-size: 0.9rem; color: var(--text-light); text-align: center;">Payment and shipping confirmed manually via email.</p>
+                <p style="font-size: 0.9rem; color: var(--text-light); text-align: center;">Secure checkout - Enter your information to complete your order.</p>
             </div>
 
             <div id="emptyCartLink" style="text-align: center; padding: 20px 0;">
@@ -429,32 +520,37 @@
         window.scrollTo(0, 0);
     }
 
-    function addToCart(name, price) {
-        // 1. Check if item already exists
-        const existingItem = cart.find(item => item.name === name);
+    function handleAddToCart(name, price) {
+        // Get the chosen filament from the dropdown (idified)
+        const materialDropdown = document.getElementById('mat-' + name.replace(/[^a-z0-9]/gi,'-')) || document.getElementById('mat-' + name);
+        const selectedMaterial = materialDropdown.value;
+
+        // Create a unique name including the material
+        const cartItemName = `${name} (${selectedMaterial})`;
+        
+        // Add to cart logic
+        const existingItem = cart.find(item => item.name === cartItemName);
         
         if (existingItem) {
             existingItem.quantity += 1;
         } else {
-            cart.push({name, price, quantity: 1});
+            cart.push({name: cartItemName, price, quantity: 1});
         }
 
         updateCartBadge();
 
-        // 2. FIXED: Feedback animation
-        // We use event.currentTarget to target the specific button clicked
+        // Button feedback
         const btn = event.currentTarget;
-        const originalText = "Add to Cart"; // Set explicitly to avoid getting stuck
-        
+        const originalText = "Add to Cart";
         btn.innerText = "✓ Added!";
         btn.style.background = "var(--success)";
-        btn.disabled = true; // Briefly disable to prevent accidental double-clicks
+        btn.disabled = true;
 
         setTimeout(() => {
             btn.innerText = originalText;
             btn.style.background = "var(--accent)";
             btn.disabled = false;
-        }, 800); // 0.8 seconds is the "sweet spot" for feedback
+        }, 800);
     }
 
     function removeFromCart(index) {
@@ -548,23 +644,111 @@
         const total = document.getElementById('cartTotal').innerText;
         window.location.href = `mailto:nexus3dbuisness@gmail.com?subject=New Order Request&body=I would like to order: ${details}%0D%0AEstimated Total: ${total}%0D%0APlease let me know the next steps for payment!`;
     }
-  
-  function filterShop(category) {
-        const items = document.querySelectorAll('.product-item');
-        const buttons = event.target.parentElement.querySelectorAll('button');
-        
-        // Reset buttons style
-        buttons.forEach(btn => {
-            btn.style.background = "white";
-            btn.style.color = "var(--text-light)";
-            btn.style.borderColor = "#cbd5e1";
-        });
-        
-        // Highlight active button
-        event.target.style.background = "var(--accent)";
-        event.target.style.color = "white";
-        event.target.style.borderColor = "var(--accent)";
 
+    function openCheckout() {
+        // Populate order summary
+        let html = "";
+        cart.forEach(item => {
+            const itemTotal = item.price * item.quantity;
+            html += `<div class="order-item"><span>${item.name} (x${item.quantity})</span><span>$${itemTotal.toFixed(2)}</span></div>`;
+        });
+        document.getElementById('checkoutOrderItems').innerHTML = html;
+        
+        const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+        document.getElementById('checkoutTotal').innerText = "$" + total.toFixed(2);
+
+        // Show checkout modal
+        document.getElementById('checkoutModal').classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeCheckout() {
+        document.getElementById('checkoutModal').classList.remove('active');
+        document.body.style.overflow = 'auto';
+    }
+
+    function submitCheckout(event) {
+        event.preventDefault();
+
+        // Get form data
+        const formData = {
+            fullName: document.getElementById('fullName').value,
+            email: document.getElementById('email').value,
+            address: document.getElementById('address').value,
+            city: document.getElementById('city').value,
+            zipCode: document.getElementById('zipCode').value,
+            phone: document.getElementById('phone').value,
+            cardName: document.getElementById('cardName').value,
+            cardNumber: document.getElementById('cardNumber').value,
+            expiry: document.getElementById('expiry').value,
+            cvv: document.getElementById('cvv').value
+        };
+
+        // Create order summary
+        const orderDetails = cart.map(i => `${i.name} (x${i.quantity})`).join(", ");
+        const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+
+        // Prepare email body
+        const emailBody = `
+ORDER CONFIRMATION
+
+Customer Information:
+Name: ${formData.fullName}
+Email: ${formData.email}
+Phone: ${formData.phone}
+Address: ${formData.address}, ${formData.city} ${formData.zipCode}
+
+Card Information:
+Cardholder: ${formData.cardName}
+Card (Last 4): ****${formData.cardNumber.slice(-4)}
+
+ORDER DETAILS:
+Items: ${orderDetails}
+Total: $${total.toFixed(2)}
+
+Please confirm receipt of this order.
+        `.trim();
+
+        // Send email with order details
+        window.location.href = `mailto:nexus3dbuisness@gmail.com?subject=Order Confirmation #${Date.now()}&body=${encodeURIComponent(emailBody)}`;
+
+        // Clear cart after checkout
+        cart = [];
+        updateCartBadge();
+        closeCheckout();
+        switchTab(event, 'shop');
+    }
+
+    window.onclick = function(event) {
+        const checkoutModal = document.getElementById('checkoutModal');
+        const productModal = document.getElementById('productModal');
+        
+        if (event.target === checkoutModal) {
+            closeCheckout();
+        }
+        if (event.target === productModal) {
+            closeModal();
+        }
+    };
+
+    function filterShop(category, btnElement) {
+        const items = document.querySelectorAll('.product-item');
+
+        // If a button element was provided, reset sibling buttons and highlight the clicked one
+        if (btnElement && btnElement.parentElement) {
+            const buttons = btnElement.parentElement.querySelectorAll('button');
+            buttons.forEach(btn => {
+                btn.style.background = "white";
+                btn.style.color = "var(--text-light)";
+                btn.style.borderColor = "#cbd5e1";
+            });
+
+            btnElement.style.background = "var(--accent)";
+            btnElement.style.color = "white";
+            btnElement.style.borderColor = "var(--accent)";
+        }
+
+        // Show/hide products based on category
         items.forEach(item => {
             if (category === 'all' || item.classList.contains(category)) {
                 item.style.display = 'block';
@@ -574,8 +758,8 @@
         });
     }
   
-  // Detailed data for the popup
-    const productData = {
+    // Default product data (used if no saved products in localStorage)
+    const defaultProductData = {
         'Crystal Dragon': {
             desc: "This stunning articulated dragon features over 40 moving joints and a crystal-like texture. Printed in high-quality Silk PLA, it has a beautiful metallic sheen. Perfect as a desk companion or a high-end fidget toy.",
             tag: "Silk PLA", tagColor: "#e0f2fe", tagTextColor: "#0369a1", price: 20.00, img: "https://images.unsplash.com/photo-1631125915902-d8abe9225ff2?w=500"
@@ -605,6 +789,59 @@
             tag: "TPU", tagColor: "#f3e8ff", tagTextColor: "#6b21a8", price: 12.00, img: "https://images.unsplash.com/photo-1591123120675-6f7f1aae0e5b?w=500"
         }
     };
+
+    // Products persistence helpers
+    function loadProducts(){
+        try{ const p = JSON.parse(localStorage.getItem('nexus_products') || 'null'); return p || JSON.parse(JSON.stringify(defaultProductData)); }catch(e){ return JSON.parse(JSON.stringify(defaultProductData)); }
+    }
+    function saveProducts(obj){ localStorage.setItem('nexus_products', JSON.stringify(obj)); }
+
+    // Use persisted products or defaults
+    let productData = loadProducts();
+
+    // Helper to create safe ids
+    function idify(name){ return name.replace(/[^a-z0-9]/gi,'-'); }
+
+    // Optional remote sync URL: set this to an endpoint that accepts POST updates
+    const REMOTE_SYNC_URL = '';
+
+    async function remoteSync(type, payload){
+        if(!REMOTE_SYNC_URL) return;
+        try{
+            await fetch(REMOTE_SYNC_URL, { method: 'POST', headers: { 'Content-Type':'application/json' }, body: JSON.stringify({type, payload}) });
+            console.log('Remote sync ok', type);
+        }catch(e){ console.warn('Remote sync failed', e); }
+    }
+
+    // Render products into the grid (used on load and after admin edits)
+    function renderProducts(){
+        const grid = document.getElementById('productGrid');
+        if(!grid) return;
+        const html = Object.keys(productData).map(name => {
+            const p = productData[name];
+            const selectId = 'mat-' + idify(name);
+            return `
+        <div class="card product-item" onclick="openModal('${name.replace(/'/g,"\\'") }')" style="cursor: pointer; min-height: 480px; display: flex; flex-direction: column; padding: 25px; justify-content: space-between;">
+            <div>
+                <img src="${p.img}" style="height: 200px; width: 100%; object-fit: cover; border-radius: 12px; margin-bottom: 15px;">
+                <h3 style="margin: 0 0 10px 0; font-size: 1.3rem;">${name}</h3>
+                <label style="display: block; font-size: 0.8rem; font-weight: 800; color: var(--text-light); text-transform: uppercase; margin-bottom: 8px;">Select Material:</label>
+                <select id="${selectId}" onclick="event.stopPropagation()" style="width: 100%; padding: 10px; border-radius: 10px; border: 2px solid #f1f5f9; background: #fff; font-family: inherit;">
+                    <option value="Standard PLA">Standard PLA</option>
+                    <option value="Flexible TPU">Flexible TPU</option>
+                </select>
+            </div>
+            <div>
+                <div class="price-badge" style="margin: 15px 0; font-size: 1.6rem;">$${p.price.toFixed(2)}</div>
+                <button class="btn" onclick="event.stopPropagation(); handleAddToCart('${name.replace(/'/g,"\\'") }', ${p.price})">Add to Cart</button>
+            </div>
+        </div>`;
+        }).join('\n');
+        grid.innerHTML = html;
+    }
+
+    // Ensure the grid and auth UI render on load
+    document.addEventListener('DOMContentLoaded', () => { renderProducts(); updateAuthUI(); });
 
     function openModal(name) {
         const item = productData[name];
@@ -637,14 +874,8 @@
     function closeModal() {
         document.getElementById('productModal').style.display = "none";
         document.body.style.overflow = "auto";
-    }
-
-    // Close modal if user clicks outside the content box
-    window.onclick = function(event) {
-        const modal = document.getElementById('productModal');
-        if (event.target == modal) {
-            closeModal();
-        }
+        // Show the button again so shop items still work
+        document.getElementById('modalAddBtn').style.display = "block";
     }
   
   // Data for the Printer Popup
@@ -732,5 +963,361 @@ function closeModal() {
         </div>
     </div>
 </div>
-</body>
-</html>
+
+  <!-- Checkout Modal -->
+  <div id="checkoutModal">
+    <div class="checkout-container">
+        <div class="checkout-header">
+            <h2>Checkout</h2>
+            <button class="close-checkout" onclick="closeCheckout()">✕</button>
+        </div>
+
+        <!-- Order Summary -->
+        <div class="order-summary">
+            <h4>📦 Order Summary</h4>
+            <div id="checkoutOrderItems"></div>
+            <div class="order-total">
+                <span>Total:</span>
+                <span id="checkoutTotal">$0.00</span>
+            </div>
+        </div>
+
+        <!-- Checkout Form -->
+        <form id="checkoutForm" onsubmit="submitCheckout(event)">
+            <!-- Personal Information -->
+            <div class="form-section">
+                <h3>Personal Information</h3>
+                <div class="form-row full">
+                    <input type="text" id="fullName" placeholder="Full Name" required>
+                </div>
+                <div class="form-row full">
+                    <input type="email" id="email" placeholder="Email Address" required>
+                </div>
+                <div class="form-row full">
+                    <input type="text" id="address" placeholder="Street Address" required>
+                </div>
+                <div class="form-row">
+                    <input type="text" id="city" placeholder="City" required>
+                    <input type="text" id="zipCode" placeholder="ZIP Code" required>
+                </div>
+                <div class="form-row full">
+                    <input type="tel" id="phone" placeholder="Phone Number" required>
+                </div>
+            </div>
+
+            <!-- Card Information -->
+            <div class="form-section">
+                <h3>💳 Card Information</h3>
+                <div class="form-row full">
+                    <input type="text" id="cardName" placeholder="Cardholder Name" required>
+                </div>
+                <div class="form-row full">
+                    <input type="text" id="cardNumber" placeholder="Card Number (16 digits)" maxlength="16" required pattern="[0-9]{16}">
+                </div>
+                <div class="form-row">
+                    <input type="text" id="expiry" placeholder="MM/YY" maxlength="5" required pattern="[0-9]{2}/[0-9]{2}">
+                    <input type="text" id="cvv" placeholder="CVV" maxlength="3" required pattern="[0-9]{3}">
+                </div>
+            </div>
+
+            <button type="submit" class="checkout-btn">Complete Purchase</button>
+        </form>
+    </div>
+</div>
+    </div>
+
+    <!-- Auth Modal -->
+    <div id="authModal" style="display:none; position:fixed; inset:0; background:rgba(15,23,42,0.85); z-index:4000; align-items:center; justify-content:center; padding:20px;">
+        <div class="card" style="max-width:420px; width:100%; position:relative;">
+            <button onclick="closeAuthModal()" style="position:absolute; right:12px; top:12px; background:var(--bg); border:none; border-radius:50%; width:36px; height:36px; cursor:pointer;">✕</button>
+            <div style="padding:20px 10px 30px 10px;">
+                <div style="display:flex; gap:8px; margin-bottom:12px;">
+                    <button id="authTabLoginBtn" onclick="showAuthTab('login')" style="flex:1; padding:10px; border-radius:10px; background:var(--accent); color:white; border:none; font-weight:700;">Login</button>
+                    <button id="authTabSignupBtn" onclick="showAuthTab('signup')" style="flex:1; padding:10px; border-radius:10px; background:#f1f5f9; color:var(--text-light); border:none; font-weight:700;">Sign Up</button>
+                </div>
+
+                <div id="authLogin" style="display:block;">
+                    <input id="loginEmail" type="email" placeholder="Email address" style="margin-bottom:10px;" />
+                    <input id="loginPassword" type="password" placeholder="Password" style="margin-bottom:12px;" />
+                    <button class="btn" style="width:100%;" onclick="loginAction()">Sign In</button>
+                </div>
+
+                <div id="authSignup" style="display:none;">
+                    <input id="signupEmail" type="email" placeholder="Email address" style="margin-bottom:10px;" />
+                    <input id="signupPassword" type="password" placeholder="Choose a password" style="margin-bottom:12px;" />
+                    <button class="btn" style="width:100%;" onclick="signupAction()">Create Account</button>
+                </div>
+                <p id="authNotice" style="color:var(--text-light); font-size:0.9rem; margin-top:12px;">Accounts are stored locally in your browser. Emails must be unique.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    // Shared crypto helper
+    async function sha256Hex(str){
+        const buf = new TextEncoder().encode(str);
+        const hashBuf = await crypto.subtle.digest('SHA-256', buf);
+        return Array.from(new Uint8Array(hashBuf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+    }
+
+    function loadUsers(){
+        return JSON.parse(localStorage.getItem('nexus_users') || '{}');
+    }
+    function saveUsers(u){ localStorage.setItem('nexus_users', JSON.stringify(u)); }
+
+    function setCurrentUser(obj){ localStorage.setItem('nexus_current_user', JSON.stringify(obj)); updateAuthUI(); }
+    function getCurrentUser(){ return JSON.parse(localStorage.getItem('nexus_current_user') || 'null'); }
+
+    function updateAuthUI(){
+        const cur = getCurrentUser();
+        const btn = document.getElementById('authBtn');
+        if(!btn) return;
+        if(cur && cur.email){
+            btn.innerText = cur.admin ? `Admin: ${cur.email}` : `Logout (${cur.email})`;
+            btn.onclick = () => { if(cur.admin){ alert('You are logged in as admin.'); } else { logout(); } };
+        } else {
+            btn.innerText = 'Login';
+            btn.onclick = openAuthModal;
+        }
+    }
+
+    function logout(){ localStorage.removeItem('nexus_current_user'); updateAuthUI(); alert('Signed out'); }
+
+    function openAuthModal(){ document.getElementById('authModal').style.display = 'flex'; showAuthTab('login'); }
+    function closeAuthModal(){ document.getElementById('authModal').style.display = 'none'; }
+
+    function showAuthTab(tab){
+        document.getElementById('authLogin').style.display = tab==='login' ? 'block' : 'none';
+        document.getElementById('authSignup').style.display = tab==='signup' ? 'block' : 'none';
+        document.getElementById('authTabLoginBtn').style.background = tab==='login' ? 'var(--accent)' : '#f1f5f9';
+        document.getElementById('authTabLoginBtn').style.color = tab==='login' ? 'white' : 'var(--text-light)';
+        document.getElementById('authTabSignupBtn').style.background = tab==='signup' ? 'var(--accent)' : '#f1f5f9';
+        document.getElementById('authTabSignupBtn').style.color = tab==='signup' ? 'white' : 'var(--text-light)';
+    }
+
+    async function signupAction(){
+        const email = (document.getElementById('signupEmail').value || '').trim().toLowerCase();
+        const password = document.getElementById('signupPassword').value || '';
+        if(!email || !password){ alert('Provide email and password'); return; }
+        const users = loadUsers();
+        if(users[email]){ alert('An account with that email already exists.'); return; }
+        const hash = await sha256Hex(password);
+        const isAdmin = (email === 'nexus3dbuisness@gmail.com' && password === 'NexusPrints3d');
+        users[email] = { password: hash, admin: !!isAdmin };
+        saveUsers(users);
+        setCurrentUser({ email, admin: !!isAdmin });
+        closeAuthModal();
+        alert('Account created and signed in.');
+    }
+
+    async function loginAction(){
+        const email = (document.getElementById('loginEmail').value || '').trim().toLowerCase();
+        const password = document.getElementById('loginPassword').value || '';
+        if(!email || !password){ alert('Provide email and password'); return; }
+        const users = loadUsers();
+        const hash = await sha256Hex(password);
+        // If the account exists and hash matches, sign in
+        if(users[email] && users[email].password === hash){
+            // ensure admin gets admin rights if account stored as admin
+            const isAdmin = !!users[email].admin || (email === 'nexus3dbuisness@gmail.com' && password === 'NexusPrints3d');
+            setCurrentUser({ email, admin: !!isAdmin });
+            closeAuthModal();
+            alert('Signed in' + (isAdmin ? ' as admin.' : '.'));
+            return;
+        }
+
+        // If the stored user doesn't exist but credentials match the default admin secret, create/set admin
+        if(email === 'nexus3dbuisness@gmail.com' && password === 'NexusPrints3d'){
+            // make sure the admin user exists in storage
+            users[email] = { password: await sha256Hex('NexusPrints3d'), admin: true };
+            saveUsers(users);
+            setCurrentUser({ email, admin: true });
+            closeAuthModal();
+            alert('Signed in as admin.');
+            return;
+        }
+
+        alert('Invalid credentials.');
+    }
+
+    // Initialize default admin entry if missing and update UI
+    (async function ensureDefaultAdmin(){
+        try{
+            const users = loadUsers();
+            if(!users['nexus3dbuisness@gmail.com']){
+                const hash = await sha256Hex('NexusPrints3d');
+                users['nexus3dbuisness@gmail.com'] = { password: hash, admin: true };
+                saveUsers(users);
+                console.log('Default admin created in localStorage');
+            }
+        }catch(e){ console.error('admin init error', e); }
+        updateAuthUI();
+    })();
+    
+    /* Admin Dashboard (product + page editor) */
+    function openAdminDashboard(){
+        const cur = getCurrentUser();
+        if(!cur || !cur.admin){ alert('Admin access required'); return; }
+        // build modal if not present
+        if(!document.getElementById('adminModal')){
+            const modal = document.createElement('div');
+            modal.id = 'adminModal';
+            modal.style.cssText = 'display:flex; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:4500; align-items:center; justify-content:center; padding:20px;';
+            modal.innerHTML = `
+            <div class="card" style="max-width:1000px; width:100%; max-height:90vh; overflow:auto;">
+                <button onclick="closeAdminDashboard()" style="position:absolute; right:18px; top:18px; background:var(--bg); border:none; border-radius:50%; width:36px; height:36px; cursor:pointer;">✕</button>
+                <div style="display:flex; gap:20px; padding:20px;">
+                    <div style="flex:1; min-width:320px;">
+                        <h3>Products</h3>
+                        <div id="adminProductList" style="max-height:60vh; overflow:auto; border:1px solid #eef2f6; padding:10px; border-radius:10px;"></div>
+                        <button class="btn" style="margin-top:12px;" onclick="adminAddProduct()">Add New Product</button>
+                    </div>
+                    <div style="flex:1; min-width:320px;">
+                        <h3>Editor</h3>
+                        <div style="margin-bottom:8px;"><label style="font-weight:700;">Section</label>
+                        <select id="adminSectionSelect" style="width:100%; padding:8px;" onchange="adminLoadSection()">
+                            <option value="shop">Shop</option>
+                            <option value="fleet">Fleet</option>
+                            <option value="quote">Quote</option>
+                            <option value="materials">Materials</option>
+                            <option value="about">About</option>
+                            <option value="cart">Cart</option>
+                        </select></div>
+                        <textarea id="adminSectionHtml" style="width:100%; height:300px; padding:10px; border-radius:8px; border:1px solid #e2e8f0;"></textarea>
+                        <div style="display:flex; gap:8px; margin-top:8px;"><button class="btn" onclick="adminSaveSection()">Save Section</button><button style="padding:10px; background:#f1f5f9; border:none;" onclick="adminResetSection()">Reset</button></div>
+                    </div>
+                </div>
+            </div>`;
+            document.body.appendChild(modal);
+        }
+        populateAdminProducts();
+        adminLoadSection();
+        document.getElementById('adminModal').style.display = 'flex';
+    }
+
+    function closeAdminDashboard(){ const m = document.getElementById('adminModal'); if(m) m.style.display='none'; }
+
+    function populateAdminProducts(){
+        const list = document.getElementById('adminProductList');
+        list.innerHTML = '';
+        Object.keys(productData).forEach(name => {
+            const p = productData[name];
+            const el = document.createElement('div');
+            el.style.cssText = 'border-bottom:1px solid #f1f5f9; padding:8px 6px; display:flex; justify-content:space-between; align-items:center; gap:8px;';
+            el.innerHTML = `<div style="flex:1;"><strong>${name}</strong><div style="color:var(--text-light); font-size:0.9rem;">$${p.price.toFixed(2)}</div></div>
+                <div style="display:flex; gap:6px;"><button onclick="adminEditProduct('${name.replace(/'/g,"\\'")}')" style="padding:6px 8px; background:#f1f5f9; border:none;">Edit</button><button onclick="adminDeleteProduct('${name.replace(/'/g,"\\'")}')" style="padding:6px 8px; background:#fee2e2; border:none; color:var(--danger);">Delete</button></div>`;
+            list.appendChild(el);
+        });
+    }
+
+    function adminAddProduct(){
+        const name = prompt('New product name');
+        if(!name) return;
+        if(productData[name]){ alert('Product already exists'); return; }
+        productData[name] = { desc: 'New product', tag: 'PLA', tagColor:'#e0f2fe', tagTextColor:'#0369a1', price: 0.00, img: '' };
+        saveProducts(productData);
+        populateAdminProducts(); renderProducts();
+        adminEditProduct(name);
+    }
+
+    function adminEditProduct(name){
+        const p = productData[name];
+        const formHtml = `
+            <div style="padding:10px; border:1px solid #eef2f6; border-radius:8px; margin-top:10px; background:#fff;">
+                <h4>Edit: ${name}</h4>
+                <label>Price</label>
+                <input id="_adm_price" type="number" value="${p.price}" style="width:100%; padding:8px; margin-bottom:8px;" />
+                <label>Image URL (or upload)</label>
+                <input id="_adm_img" type="text" value="${p.img}" style="width:100%; padding:8px; margin-bottom:8px;" />
+                <input id="_adm_img_file" type="file" accept="image/*" style="margin-bottom:8px;" />
+                <div style="margin-bottom:8px;"><img id="_adm_preview" src="${p.img}" style="max-width:100%; max-height:120px; display:${p.img?'block':'none'}; border-radius:6px;"/></div>
+                <label>Description</label>
+                <textarea id="_adm_desc" style="width:100%; height:120px; padding:8px;">${p.desc}</textarea>
+                <div style="display:flex; gap:8px; margin-top:8px;"><button class="btn" onclick="adminSaveProduct('${name.replace(/'/g,"\\'")}')">Save</button><button style="padding:10px; background:#f1f5f9; border:none;" onclick="populateAdminProducts()">Cancel</button></div>
+            </div>`;
+        const list = document.getElementById('adminProductList');
+        list.insertAdjacentHTML('afterbegin', formHtml);
+        // wire preview update
+        const fileInput = document.getElementById('_adm_img_file');
+        const urlInput = document.getElementById('_adm_img');
+        const prev = document.getElementById('_adm_preview');
+        if(fileInput){
+            fileInput.onchange = function(){
+                const f = fileInput.files && fileInput.files[0];
+                if(!f) return;
+                const reader = new FileReader();
+                reader.onload = () => { prev.src = reader.result; prev.style.display='block'; }
+                reader.readAsDataURL(f);
+            }
+        }
+        if(urlInput){ urlInput.oninput = () => { prev.src = urlInput.value; prev.style.display = urlInput.value ? 'block' : 'none'; } }
+        list.scrollTop = 0;
+    }
+
+    async function adminSaveProduct(name){
+        const price = parseFloat(document.getElementById('_adm_price').value) || 0;
+        const imgText = document.getElementById('_adm_img').value || '';
+        const fileInput = document.getElementById('_adm_img_file');
+        const desc = document.getElementById('_adm_desc').value || '';
+        if(!productData[name]){ alert('Product missing'); return; }
+        let finalImg = imgText;
+        if(fileInput && fileInput.files && fileInput.files[0]){
+            finalImg = await new Promise((res, rej) => {
+                const f = fileInput.files[0];
+                const r = new FileReader();
+                r.onload = () => res(r.result);
+                r.onerror = () => rej('read error');
+                r.readAsDataURL(f);
+            });
+        }
+        productData[name].price = price; productData[name].img = finalImg; productData[name].desc = desc;
+        saveProducts(productData);
+        await remoteSync('products', productData);
+        populateAdminProducts(); renderProducts();
+        alert('Saved');
+    }
+
+    function adminDeleteProduct(name){
+        if(!confirm('Delete product: ' + name + ' ?')) return;
+        delete productData[name]; saveProducts(productData); populateAdminProducts(); renderProducts();
+    }
+
+    // Page section editor
+    function adminLoadSection(){
+        const sec = document.getElementById('adminSectionSelect').value;
+        const stored = JSON.parse(localStorage.getItem('nexus_sections') || '{}');
+        const html = stored[sec] || document.getElementById(sec).innerHTML;
+        document.getElementById('adminSectionHtml').value = html;
+    }
+    function adminSaveSection(){
+        const sec = document.getElementById('adminSectionSelect').value;
+        const html = document.getElementById('adminSectionHtml').value;
+        const stored = JSON.parse(localStorage.getItem('nexus_sections') || '{}');
+        stored[sec] = html; localStorage.setItem('nexus_sections', JSON.stringify(stored));
+        document.getElementById(sec).innerHTML = html;
+        // attempt remote sync
+        remoteSync('sections', stored).catch(()=>{});
+        alert('Section saved');
+    }
+    function adminResetSection(){
+        const sec = document.getElementById('adminSectionSelect').value;
+        if(confirm('Reset this section to the original loaded content?')){
+            const stored = JSON.parse(localStorage.getItem('nexus_sections') || '{}'); delete stored[sec]; localStorage.setItem('nexus_sections', JSON.stringify(stored));
+            location.reload();
+        }
+    }
+
+    // Show/hide admin button based on signed-in state
+    (function wireAdminButton(){
+        const origUpdate = updateAuthUI;
+        updateAuthUI = function(){
+            origUpdate();
+            const cur = getCurrentUser();
+            const b = document.getElementById('adminBtn');
+            if(!b) return;
+            if(cur && cur.admin){ b.style.display='inline-block'; } else { b.style.display='none'; }
+        };
+    })();
+    </script>
+    </body>
+    </html>
